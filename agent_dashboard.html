@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Dashboard — Live Chat Support</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 12px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Layout ───────────────────────────────────────── */
+
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header .badge {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .main {
+      display: flex;
+      height: calc(100vh - 56px);
+    }
+
+    /* ── Queue Sidebar ────────────────────────────────── */
+
+    .sidebar {
+      width: 360px;
+      border-right: 1px solid var(--border);
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-header .count {
+      background: var(--primary);
+      color: white;
+      padding: 1px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .queue-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .queue-item {
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .queue-item:hover {
+      border-color: var(--primary);
+      background: #f1f0ff;
+    }
+
+    .queue-item.active {
+      border-color: var(--primary);
+      background: #ede9fe;
+    }
+
+    .queue-item .qi-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .queue-item .qi-preview {
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .queue-item .qi-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .qi-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .qi-status.queued {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .qi-status.agent_connected {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .qi-status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .qi-status.queued .qi-status-dot { background: var(--warning); }
+    .qi-status.agent_connected .qi-status-dot { background: var(--success); }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+      text-align: center;
+      flex: 1;
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    /* ── Chat Panel ───────────────────────────────────── */
+
+    .chat-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    .chat-panel-header {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-panel-header .cph-info h3 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .chat-panel-header .cph-info p {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .chat-panel-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .btn-danger:hover { background: #fecaca; }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .msg {
+      max-width: 75%;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg.user { align-self: flex-end; }
+    .msg.assistant, .msg.agent { align-self: flex-start; }
+    .msg.system {
+      align-self: center;
+      max-width: 100%;
+    }
+
+    .msg-bubble {
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .msg.user .msg-bubble {
+      background: var(--primary);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg.assistant .msg-bubble {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg.agent .msg-bubble {
+      background: #d1fae5;
+      border: 1px solid #a7f3d0;
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg.system .msg-bubble {
+      background: #f1f5f9;
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    .msg-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+
+    .msg-time {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+      text-align: right;
+    }
+
+    .chat-input-area {
+      padding: 12px 24px;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+    }
+
+    .chat-input-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input-wrapper textarea {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: var(--font);
+      resize: none;
+      outline: none;
+      min-height: 44px;
+      max-height: 120px;
+      transition: border-color 0.2s;
+      color: var(--text);
+    }
+
+    .chat-input-wrapper textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+
+    .chat-input-wrapper .btn {
+      align-self: flex-end;
+    }
+
+    /* ── Name Modal ───────────────────────────────────── */
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 32px;
+      width: 400px;
+      max-width: 90vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+    .modal-card h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .modal-card p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .modal-card input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: var(--font);
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .modal-card input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+
+    .modal-card .btn { width: 100%; justify-content: center; }
+
+    .hidden { display: none !important; }
+
+    /* ── Refresh indicator ────────────────────────────── */
+
+    .refresh-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--font);
+      transition: background 0.2s;
+    }
+
+    .refresh-btn:hover { background: rgba(255,255,255,0.25); }
+  </style>
+</head>
+<body>
+
+  <!-- Name Modal -->
+  <div class="modal-overlay" id="nameModal">
+    <div class="modal-card">
+      <h3>👋 Welcome, Agent</h3>
+      <p>Enter your name to start receiving customer chats.</p>
+      <input type="text" id="agentNameInput" placeholder="Your name" autofocus />
+      <button class="btn btn-primary" id="agentNameSubmit">Start Accepting Chats</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>
+      🎧 Agent Dashboard
+      <span class="badge" id="queueBadge">0 in queue</span>
+    </h1>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span id="agentNameDisplay" style="font-size:14px;opacity:0.9;"></span>
+      <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Sidebar: Queue -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        Conversations
+        <span class="count" id="sidebarCount">0</span>
+      </div>
+      <div class="queue-list" id="queueList">
+        <div class="empty-state" id="emptyQueue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p>No conversations in queue</p>
+          <small>Conversations will appear here when customers request an agent.</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div class="chat-panel">
+      <div id="chatEmpty" class="empty-state" style="flex:1;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:64px;height:64px;">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <h3 style="margin-top:16px;font-size:18px;color:var(--text);">Select a conversation</h3>
+        <p style="margin-top:8px;">Click on a conversation from the queue to start chatting.</p>
+      </div>
+
+      <div id="chatActive" class="hidden" style="display:flex;flex-direction:column;height:100%;">
+        <div class="chat-panel-header">
+          <div class="cph-info">
+            <h3 id="chatTitle">Conversation</h3>
+            <p id="chatSubtitle">Loading...</p>
+          </div>
+          <div class="chat-panel-actions">
+            <button class="btn btn-primary" id="connectBtn">Connect</button>
+            <button class="btn btn-danger" id="closeBtn">End Session</button>
+          </div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area" id="chatInputArea">
+          <div class="chat-input-wrapper">
+            <textarea id="agentInput" placeholder="Type your reply..." rows="1"></textarea>
+            <button class="btn btn-primary" id="agentSendBtn" disabled>Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ── Config ──────────────────────────────────────────────────────────
+  const SERVER_URL = window.location.origin;
+  let AGENT_NAME = "";
+  let selectedConversationId = null;
+  let agentWs = null;
+  let isConnected = false;
+
+  // ── DOM Refs ────────────────────────────────────────────────────────
+  const nameModal     = document.getElementById("nameModal");
+  const agentNameInput = document.getElementById("agentNameInput");
+  const agentNameSubmit = document.getElementById("agentNameSubmit");
+  const agentNameDisplay = document.getElementById("agentNameDisplay");
+  const queueBadge    = document.getElementById("queueBadge");
+  const sidebarCount  = document.getElementById("sidebarCount");
+  const queueList     = document.getElementById("queueList");
+  const emptyQueue    = document.getElementById("emptyQueue");
+  const chatEmpty     = document.getElementById("chatEmpty");
+  const chatActive    = document.getElementById("chatActive");
+  const chatTitle     = document.getElementById("chatTitle");
+  const chatSubtitle  = document.getElementById("chatSubtitle");
+  const chatMessages  = document.getElementById("chatMessages");
+  const connectBtn    = document.getElementById("connectBtn");
+  const closeBtn      = document.getElementById("closeBtn");
+  const agentInput    = document.getElementById("agentInput");
+  const agentSendBtn  = document.getElementById("agentSendBtn");
+  const refreshBtn    = document.getElementById("refreshBtn");
+  const chatInputArea = document.getElementById("chatInputArea");
+
+  // ── Name Modal ──────────────────────────────────────────────────────
+  agentNameSubmit.addEventListener("click", () => {
+    const name = agentNameInput.value.trim();
+    if (!name) return;
+    AGENT_NAME = name;
+    agentNameDisplay.textContent = `Agent: ${name}`;
+    nameModal.classList.add("hidden");
+    loadQueue();
+  });
+
+  agentNameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") agentNameSubmit.click();
+  });
+
+  // ── Queue Loading ───────────────────────────────────────────────────
+  async function loadQueue() {
+    try {
+      const res = await fetch(`${SERVER_URL}/api/v1/agent/queue`);
+      const data = await res.json();
+      renderQueue(data.queue);
+    } catch (e) {
+      console.error("Failed to load queue:", e);
+    }
+  }
+
+  function renderQueue(queue) {
+    const count = queue.length;
+    queueBadge.textContent = `${count} in queue`;
+    sidebarCount.textContent = count;
+
+    // Remove old items (keep empty state)
+    queueList.querySelectorAll(".queue-item").forEach(el => el.remove());
+
+    if (count === 0) {
+      emptyQueue.style.display = "flex";
+      return;
+    }
+
+    emptyQueue.style.display = "none";
+
+    queue.forEach(conv => {
+      const lastMsg = conv.recent_messages?.[conv.recent_messages.length - 1];
+      const preview = lastMsg ? lastMsg.content.substring(0, 80) : "No messages";
+      const time = new Date(conv.updated_at).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+
+      const el = document.createElement("div");
+      el.className = `queue-item${selectedConversationId === conv.id ? ' active' : ''}`;
+      el.innerHTML = `
+        <div class="qi-title">${escapeHtml(conv.title)}</div>
+        <div class="qi-preview">${escapeHtml(preview)}</div>
+        <div class="qi-meta">
+          <span class="qi-status ${conv.status}">
+            <span class="qi-status-dot"></span>
+            ${conv.status === 'queued' ? 'Waiting' : 'Connected'}
+          </span>
+          <span>${time}</span>
+        </div>
+      `;
+      el.addEventListener("click", () => selectConversation(conv));
+      queueList.appendChild(el);
+    });
+  }
+
+  // ── Select Conversation ─────────────────────────────────────────────
+  async function selectConversation(conv) {
+    // Disconnect previous
+    if (agentWs) {
+      agentWs.close();
+      agentWs = null;
+      isConnected = false;
+    }
+
+    selectedConversationId = conv.id;
+
+    chatEmpty.style.display = "none";
+    chatActive.classList.remove("hidden");
+    chatActive.style.display = "flex";
+
+    chatTitle.textContent = conv.title || "Conversation";
+    chatSubtitle.textContent = `${conv.message_count} messages • ${conv.status}`;
+
+    connectBtn.disabled = false;
+    connectBtn.textContent = "Connect";
+    agentSendBtn.disabled = true;
+
+    // Load full message history
+    try {
+      const res = await fetch(`${SERVER_URL}/api/v1/agent/conversations/${conv.id}/messages`);
+      const data = await res.json();
+      renderMessages(data.messages);
+    } catch (e) {
+      console.error("Failed to load messages:", e);
+    }
+
+    // Highlight in sidebar
+    queueList.querySelectorAll(".queue-item").forEach(el => el.classList.remove("active"));
+    event?.target?.closest?.(".queue-item")?.classList.add("active");
+
+    loadQueue(); // Refresh queue
+  }
+
+  function renderMessages(messages) {
+    chatMessages.innerHTML = "";
+    messages.forEach(msg => appendMessage(msg.role, msg.content, msg.created_at));
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function appendMessage(role, content, timestamp) {
+    const el = document.createElement("div");
+    el.className = `msg ${role}`;
+
+    const label = role === "user" ? "Customer" :
+                  role === "agent" ? `Agent` :
+                  role === "assistant" ? "AI Bot" : "System";
+
+    const time = timestamp ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
+
+    el.innerHTML = `
+      <div class="msg-label">${label}</div>
+      <div class="msg-bubble">${escapeHtml(content)}</div>
+      ${time ? `<div class="msg-time">${time}</div>` : ""}
+    `;
+    chatMessages.appendChild(el);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  // ── Connect to Conversation ─────────────────────────────────────────
+  connectBtn.addEventListener("click", () => {
+    if (!selectedConversationId || isConnected) return;
+    connectToConversation(selectedConversationId);
+  });
+
+  function connectToConversation(conversationId) {
+    const wsProtocol = SERVER_URL.startsWith("https") ? "wss" : "ws";
+    const host = SERVER_URL.replace(/^https?:\/\//, "");
+    const wsUrl = `${wsProtocol}://${host}/api/v1/ws/agent/${conversationId}?agent_name=${encodeURIComponent(AGENT_NAME)}`;
+
+    agentWs = new WebSocket(wsUrl);
+
+    agentWs.onopen = () => {
+      isConnected = true;
+      connectBtn.textContent = "Connected ✓";
+      connectBtn.disabled = true;
+      agentSendBtn.disabled = false;
+      chatSubtitle.textContent = "Live — connected";
+      agentInput.focus();
+
+      appendMessage("system", `You are now connected to this conversation.`, new Date().toISOString());
+    };
+
+    agentWs.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "message") {
+          appendMessage(data.role, data.content, data.timestamp);
+        }
+      } catch (e) {
+        console.error("WS parse error:", e);
+      }
+    };
+
+    agentWs.onclose = () => {
+      isConnected = false;
+      connectBtn.textContent = "Connect";
+      connectBtn.disabled = false;
+      agentSendBtn.disabled = true;
+      chatSubtitle.textContent = "Disconnected";
+    };
+
+    agentWs.onerror = (err) => {
+      console.error("Agent WS error:", err);
+    };
+  }
+
+  // ── Send Agent Message ──────────────────────────────────────────────
+  agentSendBtn.addEventListener("click", sendAgentMessage);
+  agentInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendAgentMessage();
+    }
+  });
+  agentInput.addEventListener("input", () => {
+    agentSendBtn.disabled = !agentInput.value.trim() || !isConnected;
+  });
+
+  function sendAgentMessage() {
+    const text = agentInput.value.trim();
+    if (!text || !agentWs || agentWs.readyState !== WebSocket.OPEN) return;
+
+    agentWs.send(JSON.stringify({ message: text }));
+    appendMessage("agent", text, new Date().toISOString());
+
+    agentInput.value = "";
+    agentSendBtn.disabled = true;
+  }
+
+  // ── Close Session ───────────────────────────────────────────────────
+  closeBtn.addEventListener("click", async () => {
+    if (!selectedConversationId) return;
+
+    try {
+      await fetch(`${SERVER_URL}/api/v1/agent/close/${selectedConversationId}`, { method: "POST" });
+    } catch (e) {
+      console.error("Failed to close session:", e);
+    }
+
+    if (agentWs) {
+      agentWs.close();
+      agentWs = null;
+    }
+
+    isConnected = false;
+    selectedConversationId = null;
+    chatActive.classList.add("hidden");
+    chatActive.style.display = "none";
+    chatEmpty.style.display = "flex";
+
+    loadQueue();
+  });
+
+  // ── Refresh ─────────────────────────────────────────────────────────
+  refreshBtn.addEventListener("click", loadQueue);
+
+  // Auto-refresh every 5 seconds
+  setInterval(loadQueue, 5000);
+
+  // ── Util ────────────────────────────────────────────────────────────
+  function escapeHtml(text) {
+    const d = document.createElement("div");
+    d.textContent = text;
+    return d.innerHTML;
+  }
+</script>
+</body>
+</html>

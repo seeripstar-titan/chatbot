@@ -1,0 +1,18 @@
+rm -f chatbot.db && source .venv/bin/activate && python -m backend.seed 2>&1
+
+============================================================
+🚀 DATABASE SEEDED SUCCESSFULLY!
+============================================================
+
+📋 Tenant: Jewellery Store
+🆔 Tenant ID: bef48066-ba25-44f0-bf4f-9939f38e4320
+
+🔑 API Key (save this — shown only once):
+   cb_QBnIoTo_Ga1Gi7vg9Dmjh5gzmj1fJRIrRTBrCQFb5qc
+
+👤 Demo User: john@example.com / password123
+
+📦 Sample Orders: ORD-001, ORD-002, ORD-003, ORD-004
+🛍️  Sample Products: 8 products
+❓ Sample FAQs: 8 FAQs
+============================================================

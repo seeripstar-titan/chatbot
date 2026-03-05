@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TechStore - Demo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+        }
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            font-size: 24px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .navbar nav a {
+            color: #6b7280;
+            text-decoration: none;
+            margin-left: 32px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .navbar nav a:hover { color: #6366f1; }
+        .hero {
+            text-align: center;
+            padding: 80px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .hero h2 { font-size: 48px; font-weight: 800; margin-bottom: 16px; }
+        .hero p { font-size: 20px; opacity: 0.9; max-width: 600px; margin: 0 auto; }
+        .products {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        .products h3 {
+            font-size: 28px;
+            margin-bottom: 24px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #e5e7eb;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .product-card .emoji {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .product-card h4 { font-size: 18px; margin-bottom: 8px; }
+        .product-card p { color: #6b7280; font-size: 14px; margin-bottom: 16px; line-height: 1.6; }
+        .product-card .price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #6366f1;
+        }
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        .banner {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            padding: 16px 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #92400e;
+        }
+        .banner code {
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            border: 1px solid #fcd34d;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        🤖 <strong>AI Chatbot Demo</strong> — Click the chat bubble in the bottom right to try the chatbot.
+        Replace <code>YOUR_API_KEY</code> below with the API key from the seed script.
+    </div>
+
+    <div class="navbar">
+        <h1>⚡ TechStore</h1>
+        <nav>
+            <a href="#">Products</a>
+            <a href="#">Deals</a>
+            <a href="#">Support</a>
+            <a href="#">Track Order</a>
+        </nav>
+    </div>
+
+    <div class="hero">
+        <h2>Premium Tech, Delivered</h2>
+        <p>Discover the latest in electronics, accessories, and gadgets. Free shipping on orders over $50.</p>
+    </div>
+
+    <div class="products">
+        <h3>🔥 Featured Products</h3>
+        <div class="product-grid">
+            <div class="product-card">
+                <div class="emoji">🎧</div>
+                <h4>Sony WH-1000XM5</h4>
+                <p>Industry-leading noise cancellation. 30-hour battery life. Crystal clear calls.</p>
+                <div class="price">$349.99</div>
+            </div>
+            <div class="product-card">
+                <div class="emoji">💻</div>
+                <h4>MacBook Air 15" M3</h4>
+                <p>Supercharged by M3. 18-hour battery. Stunning Liquid Retina display.</p>
+                <div class="price">$1,299.00</div>
+            </div>
+            <div class="product-card">
+                <div class="emoji">📱</div>
+                <h4>iPhone 16 Pro</h4>
+                <p>A18 Pro chip. 48MP camera system. Titanium design. All-day battery.</p>
+                <div class="price">$999.00</div>
+            </div>
+            <div class="product-card">
+                <div class="emoji">📱</div>
+                <h4>Galaxy S24 Ultra</h4>
+                <p>200MP camera. Snapdragon 8 Gen 3. Built-in S Pen. Galaxy AI.</p>
+                <div class="price">$1,199.99</div>
+            </div>
+            <div class="product-card">
+                <div class="emoji">🎵</div>
+                <h4>AirPods Pro 2</h4>
+                <p>Adaptive Audio. H2 chip. Personalized Spatial Audio. USB-C.</p>
+                <div class="price">$249.00</div>
+            </div>
+            <div class="product-card">
+                <div class="emoji">🖱️</div>
+                <h4>MX Master 3S</h4>
+                <p>MagSpeed scroll. 8K DPI sensor. 70-day battery. Multi-device.</p>
+                <div class="price">$99.99</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 TechStore Demo — Powered by AI Chatbot</p>
+        <p style="margin-top: 8px;">Demo user: john@example.com / password123</p>
+        <p>Sample orders: ORD-001, ORD-002, ORD-003, ORD-004</p>
+    </div>
+
+    <!--
+      ============================================================
+      CHATBOT WIDGET INTEGRATION
+      Just this single script tag embeds the entire chatbot!
+      ============================================================
+    -->
+    <script
+        src="http://localhost:8000/widget/chatbot-widget.js"
+        data-api-key="cb_kYWKY3iuODsY5Muldho8e1bnrMTt9JDCp8Zo19iT8vM"
+        data-server="http://localhost:8000"
+        data-position="right"
+        data-theme-color="#6366f1">
+    </script>
+</body>
+</html>

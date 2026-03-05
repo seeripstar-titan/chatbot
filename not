@@ -1,0 +1,7 @@
+<script
+    src="https://your-chatbot-server.com/widget/chatbot-widget.js"
+    data-api-key="YOUR_API_KEY"
+    data-server="https://your-chatbot-server.com"
+    data-position="right"
+    data-theme-color="#6366f1">
+</script>
